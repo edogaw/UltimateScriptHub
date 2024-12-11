@@ -1,0 +1,216 @@
+-- Load the Orion Library
+local OrionLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/shlexware/Orion/main/source"))()
+
+-- Initialize the window
+local Window = OrionLib:MakeWindow({
+    Name = "Ultimate Script Hub",
+    HidePremium = false,
+    SaveConfig = true,
+    ConfigFolder = "UltimateScriptHubConfig"
+})
+
+-- Define tabs
+local MainTab = Window:MakeTab({
+    Name = "Main",
+    Icon = "rbxassetid://4483345998",
+    PremiumOnly = false
+})
+
+local FunTab = Window:MakeTab({
+    Name = "Fun Scripts",
+    Icon = "rbxassetid://4483345998",
+    PremiumOnly = false
+})
+
+local SettingsTab = Window:MakeTab({
+    Name = "Settings",
+    Icon = "rbxassetid://4483345998",
+    PremiumOnly = false
+})
+
+-- Add buttons
+MainTab:AddButton({
+    Name = "Kill All Players",
+    Callback = function()
+        for _, player in pairs(game.Players:GetPlayers()) do
+            if player ~= game.Players.LocalPlayer then
+                local character = player.Character
+                if character and character:FindFirstChild("Humanoid") then
+                    character.Humanoid.Health = 0
+                end
+            end
+        end
+        print("Executed Kill All Players script.")
+    end
+})
+
+MainTab:AddButton({
+    Name = "Teleport to Player",
+    Callback = function()
+        local targetPlayerName = "TargetPlayer" -- Replace with the target player name
+        local targetPlayer = game.Players:FindFirstChild(targetPlayerName)
+        if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
+            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = targetPlayer.Character.HumanoidRootPart.CFrame
+        end
+        print("Executed Teleport to Player script.")
+    end
+})
+
+FunTab:AddButton({
+    Name = "Dance Party",
+    Callback = function()
+        local animations = {"rbxassetid://3189773368", "rbxassetid://507771019", "rbxassetid://507776043"}
+        local humanoid = game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+        if humanoid then
+            for _, animId in pairs(animations) do
+                local animation = Instance.new("Animation")
+                animation.AnimationId = animId
+                local track = humanoid:LoadAnimation(animation)
+                track:Play()
+                wait(2)
+            end
+        end
+        print("Dance party started!")
+    end
+})
+
+-- Add toggles
+MainTab:AddToggle({
+    Name = "Infinite Jump",
+    Default = false,
+    Callback = function(state)
+        if state then
+            game:GetService("UserInputService").JumpRequest:Connect(function()
+                game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping")
+            end)
+            print("Infinite Jump enabled.")
+        else
+            print("Infinite Jump disabled.")
+        end
+    end
+})
+
+FunTab:AddToggle({
+    Name = "Enable Fly Mode",
+    Default = false,
+    Callback = function(state)
+        local character = game.Players.LocalPlayer.Character
+        if state then
+            local bodyVelocity = Instance.new("BodyVelocity", character.HumanoidRootPart)
+            bodyVelocity.MaxForce = Vector3.new(100000, 100000, 100000)
+            bodyVelocity.Velocity = Vector3.new(0, 50, 0)
+            print("Fly Mode enabled.")
+        else
+            for _, v in pairs(character.HumanoidRootPart:GetChildren()) do
+                if v:IsA("BodyVelocity") then
+                    v:Destroy()
+                end
+            end
+            print("Fly Mode disabled.")
+        end
+    end
+})
+
+-- Add sliders
+MainTab:AddSlider({
+    Name = "Walkspeed Adjuster",
+    Min = 16,
+    Max = 100,
+    Default = 16,
+    Color = Color3.fromRGB(0, 255, 0),
+    Increment = 1,
+    ValueName = "Walkspeed",
+    Callback = function(value)
+        game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid").WalkSpeed = value
+        print("Walkspeed set to " .. value)
+    end
+})
+
+FunTab:AddSlider({
+    Name = "Jump Power Adjuster",
+    Min = 50,
+    Max = 500,
+    Default = 50,
+    Color = Color3.fromRGB(255, 0, 0),
+    Increment = 5,
+    ValueName = "Jump Power",
+    Callback = function(value)
+        game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid").JumpPower = value
+        print("Jump Power set to " .. value)
+    end
+})
+
+-- Add dropdowns
+MainTab:AddDropdown({
+    Name = "Select Tool",
+    Default = "None",
+    Options = {"Sword", "Gun", "Magic Wand"},
+    Callback = function(option)
+        local backpack = game.Players.LocalPlayer:FindFirstChild("Backpack")
+        if backpack then
+            for _, tool in pairs(backpack:GetChildren()) do
+                if tool:IsA("Tool") and tool.Name == option then
+                    tool.Parent = game.Players.LocalPlayer.Character
+                end
+            end
+        end
+        print("Selected tool: " .. option)
+    end
+})
+
+SettingsTab:AddDropdown({
+    Name = "Theme Selector",
+    Default = "Dark",
+    Options = {"Dark", "Light", "Custom"},
+    Callback = function(option)
+        print("Theme changed to: " .. option)
+        -- Add functionality to change the theme
+    end
+})
+
+-- Add keybinds
+MainTab:AddBind({
+    Name = "Quick Kill Keybind",
+    Default = Enum.KeyCode.K,
+    Hold = false,
+    Callback = function()
+        for _, player in pairs(game.Players:GetPlayers()) do
+            if player ~= game.Players.LocalPlayer then
+                local character = player.Character
+                if character and character:FindFirstChild("Humanoid") then
+                    character.Humanoid.Health = 0
+                end
+            end
+        end
+        print("Quick Kill activated!")
+    end
+})
+
+-- Add labels
+SettingsTab:AddLabel("Adjust Settings Below:")
+
+-- Add color picker
+SettingsTab:AddColorPicker({
+    Name = "UI Theme Color",
+    Default = Color3.fromRGB(255, 255, 255),
+    Callback = function(color)
+        OrionLib:SetThemeColor(color)
+        print("Selected color: " .. tostring(color))
+    end
+})
+
+-- Add notification button
+SettingsTab:AddButton({
+    Name = "Send Notification",
+    Callback = function()
+        OrionLib:MakeNotification({
+            Name = "Notification",
+            Content = "This is a test notification.",
+            Image = "rbxassetid://4483345998",
+            Time = 5
+        })
+    end
+})
+
+-- Initialize the GUI
+OrionLib:Init()
